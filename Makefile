@@ -1,4 +1,4 @@
-CFLAGS = $(shell pkg-config --cflags --libs gtk+-3.0)
+CFLAGS = $(shell pkg-config --cflags --libs gtk+-3.0 gmodule-2.0)
 
 all: bin/light_controller
 

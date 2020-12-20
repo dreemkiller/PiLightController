@@ -27,6 +27,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <signal name="clicked" handler="on_floor_button_clicked" swapped="no"/>
             <child internal-child="accessible">
               <object class="AtkObject">
                 <property name="AtkObject::accessible-name" translatable="yes">FloorToggle</property>

@@ -4,6 +4,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <stdio.h>
 
 int
 main( int    argc,
@@ -43,4 +44,9 @@ main( int    argc,
     gtk_main();
 
     return( 0 );
+}
+
+
+G_MODULE_EXPORT void on_floor_button_clicked( GtkButton *button,gpointer data) {
+	printf("on_floor_button_clicked\n");
 }
