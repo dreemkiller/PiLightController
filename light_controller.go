@@ -24,7 +24,7 @@ func main() {
 		log.Fatalln("Couldn't create app:", err)
 	}
 
-	first_floor_pix, err := gdk.PixbufNewFromFileAtScale("Floorplan_first_1bpp.bmp", 427, 320, true)
+	first_floor_pix, err := gdk.PixbufNewFromFileAtScale("Floorplan_first_1bpp.bmp", 427, 320, false)
 	if err != nil {
 		println("Failed to create pix from file:", err)
 		log.Fatalln("Failed to create pix from file:", err)
@@ -73,10 +73,17 @@ func on_floor_button_clicked() {
 	println("Floor button clicked")
 }
 
-func floorplan_button_press_event_cb() {
-	println("Floorplan pressed")
+func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
+	println("Floorplan button press, eventbox:", eventbox)
+	println("Event:", event.GdkEvent)
+	event_button := gdk.EventButtonNewFromEvent(event)
+	println("X:", event_button.X())
+	println("Y:", event_button.Y())
 }
 
-func floorplan_touch_event_cb() {
+func floorplan_touch_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
 	println("Floorplan touch event")
+	event_button := gdk.EventButtonNewFromEvent(event)
+	println("X:", event_button.X())
+	println("Y:", event_button.Y())
 }
