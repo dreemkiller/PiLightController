@@ -37,17 +37,23 @@
           </object>
         </child>
         <child>
-          <object class="GtkDrawingArea" id="Floorplan">
-            <property name="name">Floorplan</property>
+          <object class="GtkEventBox" id="FloorplanEventBox">
+            <property name="name">FloorplanEventBox</property>
             <property name="width_request">427</property>
             <property name="height_request">320</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <child internal-child="accessible">
-              <object class="AtkObject" id="Floorplan-atkobject">
-                <property name="AtkObject::accessible-name" translatable="yes">Floorplan</property>
-                <property name="AtkObject::accessible-description" translatable="yes">Floorplan for the current floor</property>
-                <property name="AtkObject::accessible-role" translatable="yes">canvas</property>
+            <signal name="button-press-event" handler="floorplan_button_press_event_cb" swapped="no"/>
+            <signal name="key-press-event" handler="floorplan_key_press_event_cb" swapped="no"/>
+            <signal name="touch-event" handler="floorplan_touch_event_cb" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="Floorplan">
+                <property name="name">Floorplan</property>
+                <property name="width_request">427</property>
+                <property name="height_request">320</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="pixbuf">Floorplan_first_1bpp.bmp</property>
               </object>
             </child>
           </object>
