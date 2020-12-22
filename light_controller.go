@@ -183,6 +183,7 @@ func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
 				println("Click in room ", this_room.Name)
 				if this_room.Responder.Id != 0 {
 					this_room.Responder.TurnOn()
+					this_room.Responder.GetStatus()
 				}
 				break
 			}
