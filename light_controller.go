@@ -28,12 +28,13 @@ type DrawableFloorplanArea struct {
 }
 
 type Room struct {
-	Name  string
-	Floor uint32
-	XMin  float64
-	XMax  float64
-	YMin  float64
-	YMax  float64
+	Name      string
+	Floor     uint32
+	XMin      float64
+	XMax      float64
+	YMin      float64
+	YMax      float64
+	Responder InsteonResponder
 }
 
 var floors_pixbuf [2]FloorPixbuf
@@ -180,6 +181,9 @@ func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
 				this_room.YMin < y &&
 				y < this_room.YMax {
 				println("Click in room ", this_room.Name)
+				if this_room.Responder.Id != 0 {
+					this_room.Responder.TurnOn()
+				}
 				break
 			}
 		}
