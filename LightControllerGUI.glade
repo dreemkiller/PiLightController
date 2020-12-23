@@ -21,7 +21,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="FloorButton">
             <property name="label" translatable="yes">Flr</property>
             <property name="name">FloorToggle</property>
             <property name="width_request">53</property>
@@ -31,7 +31,7 @@
             <property name="receives_default">True</property>
             <signal name="clicked" handler="on_floor_button_clicked" swapped="no"/>
             <child internal-child="accessible">
-              <object class="AtkObject">
+              <object class="AtkObject" id="FloorButton-atkobject">
                 <property name="AtkObject::accessible-name" translatable="yes">FloorToggle</property>
                 <property name="AtkObject::accessible-description" translatable="yes">Toggles from first to second or second to first floor</property>
               </object>
@@ -46,6 +46,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <signal name="button-press-event" handler="floorplan_button_press_event_cb" swapped="no"/>
+            <signal name="button-release-event" handler="floorplan_button_release_event_cb" swapped="no"/>
             <signal name="key-press-event" handler="floorplan_key_press_event_cb" swapped="no"/>
             <signal name="touch-event" handler="floorplan_touch_event_cb" swapped="no"/>
             <child>
