@@ -37,6 +37,11 @@ type Room struct {
 	Responder InsteonResponder
 }
 
+type Rooms struct {
+	mu    sync.RWMutex
+	array []Room
+}
+
 type FloorplanTouchTimeType struct {
 	mu   sync.Mutex
 	time uint32
@@ -50,31 +55,29 @@ var currentFloorNum FloorNumber
 
 var drawableFloorplan DrawableFloorplanArea
 
-var rooms []Room
+var rooms Rooms
 
 var signals = map[string]interface{}{
-	"on_floor_button_clicked": on_floor_button_clicked,
-	// "floorplan_button_press_event_cb":   floorplan_button_press_event_cb,
-	// "floorplan_button_release_event_cb": floorplan_button_release_event_cb,
-	"floorplan_touch_event_cb": floorplan_touch_event_cb,
-	// "floorplan_event_cb":                floorplan_event_cb,
+	"floor_button_pressed_cb":           floor_button_pressed_cb,
+	"floorplan_button_press_event_cb":   floorplan_button_press_event_cb,
+	"floorplan_button_release_event_cb": floorplan_button_release_event_cb,
 }
 
 func main() {
-	println("Started")
+	println("PiLightController started")
 	// load the room data
 	roomData, err := ioutil.ReadFile("rooms.json")
 	if err != nil {
 		println("Unable to read rooms.json file:", err)
 		log.Fatalln("Unable to read rooms.json file:", err)
 	}
-	err = json.Unmarshal([]byte(roomData), &rooms)
+	rooms.mu.Lock()
+	err = json.Unmarshal([]byte(roomData), &rooms.array)
 	if err != nil {
 		println("json.Unmarshal failed:", err)
 		log.Fatalln("json.Unmarshal failed:", err)
 	}
-
-	println("Rooms:", rooms)
+	rooms.mu.Unlock()
 
 	const appID = "com.dreemkiller.light_controller"
 	app, err := gtk.ApplicationNew(appID, glib.APPLICATION_FLAGS_NONE)
@@ -105,9 +108,7 @@ func main() {
 	floorPixbuf[1].buf = secondFloorPix
 	floorPixbuf[1].mu.Unlock()
 
-	println("Attempting to connect activate")
 	app.Connect("activate", func() {
-		println("Attempting to load glade file")
 		builder, err := gtk.BuilderNewFromFile("LightControllerGUI.glade")
 		if err != nil {
 			println("Failed to load glade file")
@@ -133,6 +134,7 @@ func main() {
 			drawableFloorplan.mu.Unlock()
 		} else {
 			println("Floorplan area is NOT image")
+			log.Fatalln("Floorplan area is NOT image")
 		}
 
 		obj, err := builder.GetObject("Top")
@@ -141,7 +143,6 @@ func main() {
 			log.Fatalln("Coultn'd get object Top")
 		}
 
-		println("Alls good so far")
 		wnd := obj.(*gtk.Window)
 		wnd.ShowAll()
 		app.AddWindow(wnd)
@@ -150,7 +151,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func on_floor_button_clicked(button *gtk.Button) {
+func floor_button_pressed_cb(button *gtk.Button) {
 	println("Floor button clicked")
 	println("button:", button)
 
@@ -176,7 +177,7 @@ const (
 	EventTypeOff
 )
 
-const pressTimeThreshold = 1000
+const pressTimeThreshold = 300
 
 func eventType(time uint32) EventType {
 	if time > pressTimeThreshold {
@@ -186,64 +187,59 @@ func eventType(time uint32) EventType {
 	}
 }
 
-// func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-// 	println("Floorplan button press")
-// 	eventButton := gdk.EventButtonNewFromEvent(event)
-// 	//floorplanTouchTime.mu.Lock()
-// 	floorplanTouchTime.time = eventButton.Time()
-// 	//floorplanTouchTime.mu.Unlock()
-// 	println("saved time:", floorplanTouchTime.time)
-
-// }
-
-// func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-// 	println("Floorplan button release, eventbox:", eventbox)
-// 	eventButton := gdk.EventButtonNewFromEvent(event)
-// 	println("X:", eventButton.X())
-// 	println("Y:", eventButton.Y())
-
-// 	//floorplanTouchTime.mu.Lock()
-// 	var startTime = floorplanTouchTime.time
-// 	//floorplanTouchTime.mu.Unlock()
-// 	println("current time:", eventButton.Time())
-// 	elapsedTime := eventButton.Time() - startTime
-// 	println("Elapsed Time:", elapsedTime)
-// 	var eventType = eventType(elapsedTime / 1000)
-
-// 	x := eventButton.X()
-// 	y := eventButton.Y()
-
-// 	currentFloorNum.mu.RLock()
-// 	currentFloor := currentFloorNum.floor
-// 	currentFloorNum.mu.RUnlock()
-
-// 	for _, thisRoom := range rooms {
-// 		if thisRoom.Floor == currentFloor {
-// 			if thisRoom.XMin < x &&
-// 				x < thisRoom.XMax &&
-// 				thisRoom.YMin < y &&
-// 				y < thisRoom.YMax {
-// 				println("In room ", thisRoom.Name)
-// 				if thisRoom.Responder.ID != 0 {
-// 					if eventType == EventTypeOn {
-// 						thisRoom.Responder.TurnOn()
-// 					} else {
-// 						thisRoom.Responder.TurnOff()
-// 					}
-// 				}
-// 				break
-// 			}
-// 		}
-// 	}
-// }
-
-func floorplan_touch_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-	println("Floorplan touch event")
+func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
+	println("Floorplan button press")
 	eventButton := gdk.EventButtonNewFromEvent(event)
-	println("X:", eventButton.X())
-	println("Y:", eventButton.Y())
+	floorplanTouchTime.mu.Lock()
+	floorplanTouchTime.time = eventButton.Time()
+	floorplanTouchTime.mu.Unlock()
 }
 
-// func floorplan_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-// 	//println("Floorplan event cb started")
-// }
+func handle_floorplan_event(eventButton *gdk.EventButton) {
+	println("handle_floorplan_event started")
+	println("X:", eventButton.X())
+	println("Y:", eventButton.Y())
+
+	floorplanTouchTime.mu.Lock()
+	var startTime = floorplanTouchTime.time
+	floorplanTouchTime.mu.Unlock()
+	elapsedTime := eventButton.Time() - startTime
+	println("Elapsed Time:", elapsedTime)
+	var eventType = eventType(elapsedTime)
+
+	x := eventButton.X()
+	y := eventButton.Y()
+	println("event type:", eventType)
+
+	currentFloorNum.mu.RLock()
+	currentFloor := currentFloorNum.floor
+	currentFloorNum.mu.RUnlock()
+
+	rooms.mu.RLock()
+	for _, thisRoom := range rooms.array {
+		if thisRoom.Floor == currentFloor {
+			if thisRoom.XMin < x &&
+				x < thisRoom.XMax &&
+				thisRoom.YMin < y &&
+				y < thisRoom.YMax {
+				println("In room ", thisRoom.Name)
+				if thisRoom.Responder.ID != 0 {
+					if eventType == EventTypeOn {
+						thisRoom.Responder.TurnOn()
+					} else {
+						thisRoom.Responder.TurnOff()
+					}
+				}
+				break
+			}
+		}
+	}
+	rooms.mu.RUnlock()
+}
+func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
+	println("Floorplan button release")
+	eventButton := gdk.EventButtonNewFromEvent(event)
+
+	// do this in a separate thread to prevent network delays from slowing down the GUI
+	go handle_floorplan_event(eventButton)
+}

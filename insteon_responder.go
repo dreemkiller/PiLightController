@@ -72,7 +72,6 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 		path = fmt.Sprintf("/3?%s=I=3", NewInsteonCommandPassThrough(ir.ID, command1, command2).Format())
 	}
 	url := fmt.Sprintf("%s%s", host, path)
-	println("URL:", url)
 
 	request := createAuthRequest(url)
 
@@ -81,15 +80,17 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 	if err != nil {
 		println("InsteonResponder.sendCommand failed:", err.Error())
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		println("sendCommand: failed to read body:", err.Error())
+	//header, err := ioutil.ReadAll(resp.Header)
+	//println("sendCommand.resp:")
+	if resp.Status != "200 OK" {
+		println("\tStatus:", resp.Status)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			println("sendCommand: failed to ReadAll from resp.Body:", err.Error())
+		}
+		println("\tHeader:", resp.Header)
+		println("\tBody:", string(body))
 	}
-	// header, _ := ioutil.ReadAll(resp.Header)
-	println("sendCommand.resp:")
-	println("\tStatus:", resp.Status)
-	println("\tHeader:", resp.Header)
-	println("\tBody:", string(body))
 }
 
 func (ir *InsteonResponder) TurnOn() {
