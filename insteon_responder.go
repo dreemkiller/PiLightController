@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -47,7 +48,9 @@ type InsteonCommand struct {
 }
 
 type InsteonResponder struct {
+	mu sync.RWMutex
 	ID   uint32
+	is_on bool
 	Type InsteonResponderType
 }
 
@@ -93,11 +96,25 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 	}
 }
 
-func (ir *InsteonResponder) TurnOn() {
+func (ir *InsteonResponder) Toggle() {
+	ir.mu.Lock()
+	if ir.is_on == true {
+		ir.unsafeTurnOff()
+		ir.is_on = false
+	} else {
+		ir.is_on = true
+		ir.unsafeTurnOn()
+	}
+	ir.mu.Unlock()
+}
+
+func (ir *InsteonResponder) unsafeTurnOn() {
+	println("Turning on")
 	ir.sendCommand(0x11, 0xff)
 }
 
-func (ir *InsteonResponder) TurnOff() {
+func (ir *InsteonResponder) unsafeTurnOff() {
+	println("Turning off")
 	ir.sendCommand(0x13, 0xff)
 }
 
@@ -144,7 +161,7 @@ func parseResponse(hub_response string) {
 	println("Power level:", remainderString[0:2])
 }
 
-func (ir *InsteonResponder) GetStatus() {
+func (ir *InsteonResponder) GetStatus() bool {
 	ir.sendCommand(0x19, 0x00)
 
 	time.Sleep(3 * time.Second)

@@ -60,7 +60,6 @@ var rooms Rooms
 var signals = map[string]interface{}{
 	"floor_button_pressed_cb":           floor_button_pressed_cb,
 	"floorplan_button_press_event_cb":   floorplan_button_press_event_cb,
-	"floorplan_button_release_event_cb": floorplan_button_release_event_cb,
 }
 
 func main() {
@@ -165,58 +164,31 @@ func floor_button_pressed_cb(button *gtk.Button) {
 	floorPixbuf[currentFloor].mu.RUnlock()
 
 	drawableFloorplan.mu.Lock()
-	//drawableFloorplan.image = drawableFloorplanArea
 	drawableFloorplan.image.SetFromPixbuf(pixbuf)
 	drawableFloorplan.mu.Unlock()
 }
 
-type EventType int
-
-const (
-	EventTypeOn = iota
-	EventTypeOff
-)
-
-const pressTimeThreshold = 300
-
-func eventType(time uint32) EventType {
-	if time > pressTimeThreshold {
-		return EventTypeOff
-	} else {
-		return EventTypeOn
-	}
-}
-
 func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-	println("Floorplan button press")
-	eventButton := gdk.EventButtonNewFromEvent(event)
-	floorplanTouchTime.mu.Lock()
-	floorplanTouchTime.time = eventButton.Time()
-	floorplanTouchTime.mu.Unlock()
+	// do this in a separate thread to prevent network delays from slowing down the GUI
+	// response time
+	go handle_floorplan_event(event)
 }
 
-func handle_floorplan_event(eventButton *gdk.EventButton) {
+func handle_floorplan_event(event *gdk.Event) {
+	eventButton := gdk.EventButtonNewFromEvent(event)
 	println("handle_floorplan_event started")
-	println("X:", eventButton.X())
-	println("Y:", eventButton.Y())
-
-	floorplanTouchTime.mu.Lock()
-	var startTime = floorplanTouchTime.time
-	floorplanTouchTime.mu.Unlock()
-	elapsedTime := eventButton.Time() - startTime
-	println("Elapsed Time:", elapsedTime)
-	var eventType = eventType(elapsedTime)
 
 	x := eventButton.X()
 	y := eventButton.Y()
-	println("event type:", eventType)
+	println("X:", x)
+	println("Y:", y)
 
 	currentFloorNum.mu.RLock()
 	currentFloor := currentFloorNum.floor
 	currentFloorNum.mu.RUnlock()
 
 	rooms.mu.RLock()
-	for _, thisRoom := range rooms.array {
+	for i, thisRoom := range rooms.array {
 		if thisRoom.Floor == currentFloor {
 			if thisRoom.XMin < x &&
 				x < thisRoom.XMax &&
@@ -224,22 +196,13 @@ func handle_floorplan_event(eventButton *gdk.EventButton) {
 				y < thisRoom.YMax {
 				println("In room ", thisRoom.Name)
 				if thisRoom.Responder.ID != 0 {
-					if eventType == EventTypeOn {
-						thisRoom.Responder.TurnOn()
-					} else {
-						thisRoom.Responder.TurnOff()
-					}
+					// not using thisRoom below because we want to modify
+					// the contents of the variable, not a copy of it
+					rooms.array[i].Responder.Toggle()
 				}
 				break
 			}
 		}
 	}
 	rooms.mu.RUnlock()
-}
-func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-	println("Floorplan button release")
-	eventButton := gdk.EventButtonNewFromEvent(event)
-
-	// do this in a separate thread to prevent network delays from slowing down the GUI
-	go handle_floorplan_event(eventButton)
 }
