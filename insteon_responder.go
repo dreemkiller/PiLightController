@@ -48,10 +48,10 @@ type InsteonCommand struct {
 }
 
 type InsteonResponder struct {
-	mu sync.RWMutex
-	ID   uint32
+	mu    sync.RWMutex
+	ID    uint32
 	is_on bool
-	Type InsteonResponderType
+	Type  InsteonResponderType
 }
 
 func createAuthRequest(url string) *http.Request {
@@ -118,7 +118,7 @@ func (ir *InsteonResponder) unsafeTurnOff() {
 	ir.sendCommand(0x13, 0xff)
 }
 
-func parseResponse(hub_response string) {
+func parseResponse(hub_response string) bool {
 	// skip the <response><BS> junk at the front
 	remainderString := hub_response[14 : len(hub_response)-1]
 	// skip the command that's being mirrored back to me
@@ -159,6 +159,11 @@ func parseResponse(hub_response string) {
 
 	// XX - power level. FF is all on
 	println("Power level:", remainderString[0:2])
+	if remainderString[0:2] != "00" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (ir *InsteonResponder) GetStatus() bool {
@@ -184,5 +189,17 @@ func (ir *InsteonResponder) GetStatus() bool {
 
 	bodyString := string(bodyBytes)
 	println("bodyString:", bodyString)
-	parseResponse(bodyString)
+	return parseResponse(bodyString)
+}
+
+func (ir *InsteonResponder) UpdateStatus() {
+	status := ir.GetStatus()
+	ir.mu.RLock()
+	old_status := ir.is_on
+	ir.mu.RUnlock()
+	if old_status != status {
+		ir.mu.Lock()
+		ir.is_on = status
+		ir.mu.Unlock()
+	}
 }

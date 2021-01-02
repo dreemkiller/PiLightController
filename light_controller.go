@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
@@ -58,8 +59,8 @@ var drawableFloorplan DrawableFloorplanArea
 var rooms Rooms
 
 var signals = map[string]interface{}{
-	"floor_button_pressed_cb":           floor_button_pressed_cb,
-	"floorplan_button_press_event_cb":   floorplan_button_press_event_cb,
+	"floor_button_pressed_cb":         floor_button_pressed_cb,
+	"floorplan_button_press_event_cb": floorplan_button_press_event_cb,
 }
 
 func main() {
@@ -142,6 +143,9 @@ func main() {
 			log.Fatalln("Coultn'd get object Top")
 		}
 
+		// start the thread to periodically check the status of the devices
+		go light_status_loop()
+
 		wnd := obj.(*gtk.Window)
 		wnd.ShowAll()
 		app.AddWindow(wnd)
@@ -205,4 +209,19 @@ func handle_floorplan_event(event *gdk.Event) {
 		}
 	}
 	rooms.mu.RUnlock()
+}
+
+func light_status_loop() {
+	for {
+		time.Sleep(5 * time.Second)
+		rooms.mu.RLock()
+		for i, thisRoom := range rooms.array {
+			if thisRoom.Responder.ID != 0 {
+				// Not using thisRoom because we want to modify
+				// the contents of the variable, not a copy of it
+				rooms.array[i].Responder.UpdateStatus()
+			}
+		}
+
+	}
 }
