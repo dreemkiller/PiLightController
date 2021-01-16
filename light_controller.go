@@ -48,6 +48,18 @@ type FloorplanTouchTimeType struct {
 	time uint32
 }
 
+type Color struct {
+	Red uint8
+	Green uint8
+	Blue uint8
+}
+
+var yellow = Color {
+	235,
+	235,
+	52,
+}
+
 var floorPixbuf [2]FloorPixbuf
 
 var floorplanTouchTime FloorplanTouchTimeType
@@ -95,6 +107,20 @@ func main() {
 		println("Failed to create pix from file:", err)
 		log.Fatalln("Failed to create pix from file:", err)
 	}
+	println("firstFloorPix.GetBitsPerSample:", firstFloorPix.GetBitsPerSample())
+	pixels := firstFloorPix.GetPixels()
+	println("firstFloorPix.GetWidth:", firstFloorPix.GetWidth())
+	println("firstFloorPix.GetHeight:", firstFloorPix.GetHeight())
+	println("firstFloorPix.GetPixels.len:", len(pixels))
+	println("firstFloorPix.GetNChannels():", firstFloorPix.GetNChannels())
+	println("firstFloorPix.GetRowStride():", firstFloorPix.GetRowstride())
+	println("rowstride * Height:", firstFloorPix.GetRowstride() * firstFloorPix.GetHeight())
+	//expected_len := firstFloorPix.GetNChannels() * (firstFloorPix.GetBitsPerSample()/8) * firstFloorPix.GetWidth() * firstFloorPix.GetHeight()
+	expected_len := firstFloorPix.GetRowstride() * firstFloorPix.GetHeight()
+	println("firstFloorPix.Expected Pixel Length:", expected_len)
+	println("difference:", len(pixels) - expected_len)
+	println("Colorspace:", firstFloorPix.GetColorspace())
+
 	floorPixbuf[0].mu.Lock()
 	floorPixbuf[0].buf = firstFloorPix
 	floorPixbuf[0].mu.Unlock()
@@ -202,13 +228,41 @@ func handle_floorplan_event(event *gdk.Event) {
 				if thisRoom.Responder.ID != 0 {
 					// not using thisRoom below because we want to modify
 					// the contents of the variable, not a copy of it
+					toggleRoomColor(thisRoom)
 					rooms.array[i].Responder.Toggle()
+					
 				}
 				break
 			}
 		}
 	}
 	rooms.mu.RUnlock()
+}
+
+func toggleRoomColor(room Room) {
+	println("toggleRoom called")
+	floorPixbuf[room.Floor].mu.Lock()
+	var pixbuf = floorPixbuf[room.Floor].buf
+	pixels := pixbuf.GetPixels()
+	for y := int(room.YMin); y < int(room.YMax); y++ {
+		for x := int(room.XMin); x < int(room.XMax); x++ {
+			pixel_byte_offset := (pixbuf.GetRowstride() * y) + (pixbuf.GetBitsPerSample()/8 * pixbuf.GetNChannels() * x)
+			pixels[pixel_byte_offset] ^= yellow.Red ^ 0xff
+			pixels[pixel_byte_offset + 1] ^= yellow.Green ^ 0xff
+			pixels[pixel_byte_offset + 2] ^= yellow.Blue ^ 0xff
+		}
+	}
+	floorPixbuf[room.Floor].mu.Unlock()
+
+	
+	currentFloorNum.mu.RLock()
+	var currentFloor = currentFloorNum.floor
+	currentFloorNum.mu.RUnlock()
+	if currentFloor == room.Floor {
+		drawableFloorplan.mu.Lock()
+		drawableFloorplan.image.SetFromPixbuf(pixbuf)
+		drawableFloorplan.mu.Unlock()
+	}
 }
 
 func light_status_loop() {
@@ -219,9 +273,41 @@ func light_status_loop() {
 			if thisRoom.Responder.ID != 0 {
 				// Not using thisRoom because we want to modify
 				// the contents of the variable, not a copy of it
-				rooms.array[i].Responder.UpdateStatus()
+				changed := rooms.array[i].Responder.UpdateStatus()
+				if changed {
+					if rooms.array[i].Responder.is_on {
+						turn_on_room(&rooms.array[i])
+					} else {
+						turn_off_room(&rooms.array[i])
+					}
+					toggleRoomColor(rooms.array[i])
+				}
 			}
 		}
 
 	}
+}
+
+func turn_on_room(room *Room) {
+	println("turn_on_room")
+	floorPixbuf[room.Floor].mu.Lock()
+	pixels := floorPixbuf[room.Floor].buf.GetPixels()
+	println("pixels (length:", len(pixels), "):")
+	// for _, byte := range pixels {
+	// 	print(byte)
+	// }
+	println("")
+	floorPixbuf[room.Floor].mu.Unlock()
+}
+
+func turn_off_room(room *Room) {
+	println("turn_off_room")
+	floorPixbuf[room.Floor].mu.Lock()
+	pixels := floorPixbuf[room.Floor].buf.GetPixels()
+	println("pixels (length:", len(pixels), "):")
+	// for _, byte := range pixels {
+	// 	print(byte)
+	// }
+	println("")
+	floorPixbuf[room.Floor].mu.Unlock()
 }

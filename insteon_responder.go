@@ -62,6 +62,7 @@ func createAuthRequest(url string) *http.Request {
 	request.SetBasicAuth(hubUsername, hubPassword)
 	return request
 }
+
 func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 	host := fmt.Sprintf("http://%s:%d", hubIP, hubPort)
 	var path string
@@ -82,6 +83,7 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 	resp, err := client.Do(request)
 	if err != nil {
 		println("InsteonResponder.sendCommand failed:", err.Error())
+		return
 	}
 	//header, err := ioutil.ReadAll(resp.Header)
 	//println("sendCommand.resp:")
@@ -192,7 +194,8 @@ func (ir *InsteonResponder) GetStatus() bool {
 	return parseResponse(bodyString)
 }
 
-func (ir *InsteonResponder) UpdateStatus() {
+func (ir *InsteonResponder) UpdateStatus() bool {
+	status_changed := false
 	status := ir.GetStatus()
 	ir.mu.RLock()
 	old_status := ir.is_on
@@ -201,5 +204,7 @@ func (ir *InsteonResponder) UpdateStatus() {
 		ir.mu.Lock()
 		ir.is_on = status
 		ir.mu.Unlock()
+		status_changed = true
 	}
+	return status_changed
 }
