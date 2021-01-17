@@ -60,6 +60,8 @@ func createAuthRequest(url string) *http.Request {
 		println("Failed to create request:", err.Error())
 	}
 	request.SetBasicAuth(hubUsername, hubPassword)
+	request.Close = true
+	request.Header.Set("Connection", "close")
 	return request
 }
 
@@ -96,6 +98,7 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 		println("\tHeader:", resp.Header)
 		println("\tBody:", string(body))
 	}
+	resp.Body.Close()
 }
 
 func (ir *InsteonResponder) Toggle() {
@@ -189,6 +192,8 @@ func (ir *InsteonResponder) GetStatus() bool {
 	if err != nil {
 		println("Failed to read body:", err.Error())
 	}
+
+	resp.Body.Close()
 
 	bodyString := string(bodyBytes)
 	println("bodyString:", bodyString)
