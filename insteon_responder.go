@@ -182,6 +182,7 @@ func (ir *InsteonResponder) GetStatus() bool {
 	resp, err := client.Do(request)
 	if err != nil {
 		println("htt.Get returned err:", err.Error())
+		return false
 	}
 	println("resp:", resp)
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
