@@ -189,6 +189,7 @@ func floor_button_pressed_cb(button *gtk.Button) {
 	currentFloor := currentFloorNum.floor
 	currentFloorNum.mu.Unlock()
 
+	println!("currentFloor:{}", currentFloor)
 	floorPixbuf[currentFloor].mu.RLock()
 	var pixbuf = floorPixbuf[currentFloor].buf
 	floorPixbuf[currentFloor].mu.RUnlock()
@@ -196,6 +197,7 @@ func floor_button_pressed_cb(button *gtk.Button) {
 	drawableFloorplan.mu.Lock()
 	drawableFloorplan.image.SetFromPixbuf(pixbuf)
 	drawableFloorplan.mu.Unlock()
+	println("Floor button click done")
 }
 
 func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
