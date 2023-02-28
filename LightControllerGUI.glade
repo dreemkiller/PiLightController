@@ -47,6 +47,7 @@
             <property name="can_focus">False</property>
             <signal name="button-press-event" handler="floorplan_button_press_event_cb" swapped="no"/>
             <signal name="key-press-event" handler="floorplan_key_press_event_cb" swapped="no"/>
+            <signal name="button-release-event" handler="floorplan_button_release_event_cb" swapped="no"/>
             <signal name="touch-event" handler="floorplan_touch_event_cb" swapped="no"/>
             <child>
               <object class="GtkImage" id="Floorplan">

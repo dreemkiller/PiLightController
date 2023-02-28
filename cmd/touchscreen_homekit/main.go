@@ -2,11 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"sync"
+	"time"
 
+	"github.com/dreemkiller/TouchScreenHomekit/homelink_controller"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -27,6 +30,9 @@ type DrawableFloorplanArea struct {
 	image *gtk.Image
 }
 
+type RoomChannels struct {
+}
+
 type Room struct {
 	Name      string
 	Floor     uint32
@@ -34,7 +40,7 @@ type Room struct {
 	XMax      float64
 	YMin      float64
 	YMax      float64
-	Responder InsteonResponder
+	ChannelId uint32
 }
 
 var floors_pixbuf [2]FloorPixbuf
@@ -44,15 +50,22 @@ var current_floor_num FloorNumber
 var drawable_floorplan DrawableFloorplanArea
 
 var rooms []Room
+var channels = []chan bool{
+	make(chan bool),
+	make(chan bool),
+}
 
 var signals = map[string]interface{}{
-	"on_floor_button_clicked":         on_floor_button_clicked,
-	"floorplan_button_press_event_cb": floorplan_button_press_event_cb,
-	"floorplan_touch_event_cb":        floorplan_touch_event_cb,
+	"on_floor_button_clicked":           on_floor_button_clicked,
+	"floorplan_button_press_event_cb":   floorplan_button_press_event_cb,
+	"floorplan_button_release_event_cb": floorplan_button_release_event_cb,
+	"floorplan_touch_event_cb":          floorplan_touch_event_cb,
 }
 
 func main() {
 	println("Started")
+	//lrl_chan := make(chan bool)
+	go homelink_controller.Setup(&channels[1])
 	// load the room data
 	room_data, err := ioutil.ReadFile("rooms.json")
 	if err != nil {
@@ -160,9 +173,21 @@ func on_floor_button_clicked(button *gtk.Button) {
 	drawable_floorplan.mu.Unlock()
 }
 
+var press_start_time time.Time
+var long_click_threshold_ms int64 = 250
+
 func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
-	println("Floorplan button press, eventbox:", eventbox)
-	println("Event:", event.GdkEvent)
+	press_start_time = time.Now()
+	println("Floorplan button press")
+}
+
+func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
+	press_length := time.Now().Sub(press_start_time).Milliseconds()
+	fmt.Println("press length:", press_length)
+	long_click := false
+	if press_length > long_click_threshold_ms {
+		long_click = true
+	}
 	event_button := gdk.EventButtonNewFromEvent(event)
 	println("X:", event_button.X())
 	println("Y:", event_button.Y())
@@ -181,9 +206,20 @@ func floorplan_button_press_event_cb(eventbox *gtk.EventBox, event *gdk.Event) {
 				this_room.YMin < y &&
 				y < this_room.YMax {
 				println("Click in room ", this_room.Name)
-				if this_room.Responder.Id != 0 {
-					this_room.Responder.TurnOn()
-					this_room.Responder.GetStatus()
+				//if this_room.Responder.Id != 0 {
+				// 	go this_room.Responder.TurnOn()
+				// 	//this_room.Responder.GetStatus()
+				// }
+				if this_room.ChannelId != 0 {
+					fmt.Println("this_room.ChannelId:", this_room.ChannelId)
+					this_channel := channels[this_room.ChannelId]
+					fmt.Println("this_room.Chan not nil. Sending down channel")
+					if long_click {
+						this_channel <- false
+					} else {
+						this_channel <- true
+					}
+					fmt.Println("this_room.Chan sent")
 				}
 				break
 			}

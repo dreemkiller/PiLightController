@@ -45,11 +45,7 @@
         "XMin": 1.070241e+001,
         "XMax": 1.198248e+002,
         "YMin": 1.118566e+002,
-        "YMax": 3.073192e+002,
-        "Responder": {
-            "Id": 2660053,
-            "Type": 0
-        }
+        "YMax": 3.073192e+002
     },
     {
         "Name": "Living Room",
@@ -58,10 +54,7 @@
         "XMax": 2.915685e+002,
         "YMin": 1.125203e+002,
         "YMax": 2.106824e+002,
-        "Responder": {
-            "Id": 8,
-            "Type": 0
-        }
+        "ChannelId": 1
     },
     {
         "Name": "Breakfast Area",
@@ -85,11 +78,7 @@
         "XMin": 3.172719e+002,
         "XMax": 4.170856e+002,
         "YMin": 2.155249e+002,
-        "YMax": 3.083720e+002,
-        "Responder": {
-            "Id": 4646116,
-            "Type": 1
-        }
+        "YMax": 3.083720e+002
     },
     {
         "Name": "Front Room",
@@ -97,11 +86,7 @@
         "XMin": 3.223658e+002,
         "XMax": 4.180371e+002,
         "YMin": 8.324715e+001,
-        "YMax": 2.100872e+002,
-        "Responder": {
-            "Id": 4645852,
-            "Type": 1
-        }
+        "YMax": 2.100872e+002
     },
     {
         "Name": "Anderson's Room",
@@ -141,11 +126,7 @@
         "XMin": 9.274951e+001,
         "XMax": 2.086064e+002,
         "YMin": 1.107211e+002,
-        "YMax": 2.157173e+002,
-        "Responder": {
-            "Id": 4646024,
-            "Type": 1
-        }
+        "YMax": 2.157173e+002
     },
     {
         "Name": "Balcony",

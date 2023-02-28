@@ -1,4 +1,4 @@
-package main
+package intsteon_controller
 
 import (
 	"fmt"
@@ -80,10 +80,12 @@ func (ir *InsteonResponder) sendCommand(command1 uint8, command2 uint8) {
 	resp, err := client.Do(request)
 	if err != nil {
 		println("InsteonResponder.sendCommand failed:", err.Error())
+		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		println("sendCommand: failed to read body:", err.Error())
+		return
 	}
 	// header, _ := ioutil.ReadAll(resp.Header)
 	println("sendCommand.resp:")
@@ -157,11 +159,13 @@ func (ir *InsteonResponder) GetStatus() {
 	resp, err := client.Do(request)
 	if err != nil {
 		println("htt.Get returned err:", err.Error())
+		return
 	}
 	println("resp:", resp)
 	body_bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		println("Failed to read body:", err.Error())
+		return
 	}
 
 	body_string := string(body_bytes)
