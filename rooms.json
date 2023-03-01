@@ -5,7 +5,8 @@
         "XMin": 3.407795e+002,
         "XMax": 4.189824e+002,
         "YMin": 8.223145e+000,
-        "YMax": 7.966930e+001
+        "YMax": 7.966930e+001,
+        "ChannelId" : -1
     },
     {
         "Name": "Hall Bath",
@@ -13,7 +14,8 @@
         "XMin": 2.951499e+002,
         "XMax": 3.389692e+002,
         "YMin": 8.487808e+000,
-        "YMax": 7.880220e+001
+        "YMax": 7.880220e+001,
+        "ChannelId" : -1
     },
     {
         "Name": "Master Closet",
@@ -21,7 +23,8 @@
         "XMin": 2.522677e+002,
         "XMax": 2.937077e+002,
         "YMin": 8.286057e+000,
-        "YMax": 8.093375e+001
+        "YMax": 8.093375e+001,
+        "ChannelId" : -1
     },
     {
         "Name": "Master Bathroom",
@@ -29,7 +32,8 @@
         "XMin": 1.313815e+002,
         "XMax": 2.341909e+002,
         "YMin": 9.732468e+000,
-        "YMax": 1.034971e+002
+        "YMax": 1.034971e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Master Bedroom",
@@ -37,7 +41,8 @@
         "XMin": 1.173062e+001,
         "XMax": 1.300146e+002,
         "YMin": 9.303192e+000,
-        "YMax": 1.071195e+002
+        "YMax": 1.071195e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Patio",
@@ -45,7 +50,8 @@
         "XMin": 1.070241e+001,
         "XMax": 1.198248e+002,
         "YMin": 1.118566e+002,
-        "YMax": 3.073192e+002
+        "YMax": 3.073192e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Living Room",
@@ -54,7 +60,7 @@
         "XMax": 2.915685e+002,
         "YMin": 1.125203e+002,
         "YMax": 2.106824e+002,
-        "ChannelId": 1
+        "ChannelId": 0
     },
     {
         "Name": "Breakfast Area",
@@ -62,7 +68,8 @@
         "XMin": 1.222563e+002,
         "XMax": 1.907094e+002,
         "YMin": 2.142972e+002,
-        "YMax": 3.076605e+002
+        "YMax": 3.076605e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Kitchen",
@@ -70,7 +77,8 @@
         "XMin": 1.951946e+002,
         "XMax": 3.152766e+002,
         "YMin": 2.160663e+002,
-        "YMax": 3.068484e+002
+        "YMax": 3.068484e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Dining Room",
@@ -78,7 +86,8 @@
         "XMin": 3.172719e+002,
         "XMax": 4.170856e+002,
         "YMin": 2.155249e+002,
-        "YMax": 3.083720e+002
+        "YMax": 3.083720e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Front Room",
@@ -86,7 +95,8 @@
         "XMin": 3.223658e+002,
         "XMax": 4.180371e+002,
         "YMin": 8.324715e+001,
-        "YMax": 2.100872e+002
+        "YMax": 2.100872e+002,
+        "ChannelId": 1
     },
     {
         "Name": "Anderson's Room",
@@ -94,7 +104,8 @@
         "XMin": 3.036294e+002,
         "XMax": 4.166523e+002,
         "YMin": 7.794479e+000,
-        "YMax": 8.017906e+001
+        "YMax": 8.017906e+001,
+        "ChannelId" : -1
     },
     {
         "Name": "Verity's Room",
@@ -102,7 +113,8 @@
         "XMin": 9.111255e+001,
         "XMax": 2.093369e+002,
         "YMin": 6.075577e+000,
-        "YMax": 1.118706e+002
+        "YMax": 1.118706e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Conner's Room",
@@ -110,7 +122,8 @@
         "XMin": 9.369849e+001,
         "XMax": 2.242681e+002,
         "YMin": 2.177037e+002,
-        "YMax": 3.121193e+002
+        "YMax": 3.121193e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Derek's Office",
@@ -118,7 +131,8 @@
         "XMin": 3.198970e+002,
         "XMax": 4.167307e+002,
         "YMin": 2.176816e+002,
-        "YMax": 3.120086e+002
+        "YMax": 3.120086e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Library",
@@ -126,7 +140,8 @@
         "XMin": 9.274951e+001,
         "XMax": 2.086064e+002,
         "YMin": 1.107211e+002,
-        "YMax": 2.157173e+002
+        "YMax": 2.157173e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Balcony",
@@ -134,7 +149,8 @@
         "XMin": 2.118918e+002,
         "XMax": 2.805515e+002,
         "YMin": 8.241826e+001,
-        "YMax": 2.126559e+002
+        "YMax": 2.126559e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Landing",
@@ -142,7 +158,8 @@
         "XMin": 2.819109e+002,
         "XMax": 3.057361e+002,
         "YMin": 1.922260e+002,
-        "YMax": 2.140802e+002
+        "YMax": 2.140802e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Upper Front Room",
@@ -150,7 +167,8 @@
         "XMin": 3.096448e+002,
         "XMax": 4.169849e+002,
         "YMin": 8.287424e+001,
-        "YMax": 2.146537e+002
+        "YMax": 2.146537e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Conner's Bathroom",
@@ -158,7 +176,8 @@
         "XMin": 2.267844e+002,
         "XMax": 2.724482e+002,
         "YMin": 2.602583e+002,
-        "YMax": 3.134807e+002
+        "YMax": 3.134807e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Utility Room",
@@ -166,7 +185,8 @@
         "XMin": 2.759333e+002,
         "XMax": 3.181328e+002,
         "YMin": 2.622907e+002,
-        "YMax": 3.117788e+002
+        "YMax": 3.117788e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "East Hallway",
@@ -174,7 +194,8 @@
         "XMin": 2.253801e+002,
         "XMax": 3.177842e+002,
         "YMin": 2.163401e+002,
-        "YMax": 2.600360e+002
+        "YMax": 2.600360e+002,
+        "ChannelId" : -1
     },
     {
         "Name": "Verity and Anderson's Bathroom",
@@ -182,7 +203,8 @@
         "XMin": 2.091299e+002,
         "XMax": 2.720869e+002,
         "YMin": 6.776001e+000,
-        "YMax": 7.980273e+001
+        "YMax": 7.980273e+001,
+        "ChannelId" : -1
     },
     {
         "Name": "Verity and Anderson's WC",
@@ -190,6 +212,7 @@
         "XMin": 2.722590e+002,
         "XMax": 3.012227e+002,
         "YMin": 6.672073e+000,
-        "YMax": 5.625174e+001
+        "YMax": 5.625174e+001,
+        "ChannelId" : -1
     }
 ]

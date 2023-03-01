@@ -40,7 +40,7 @@ type Room struct {
 	XMax      float64
 	YMin      float64
 	YMax      float64
-	ChannelId uint32
+	ChannelId int32
 }
 
 var floors_pixbuf [2]FloorPixbuf
@@ -50,9 +50,9 @@ var current_floor_num FloorNumber
 var drawable_floorplan DrawableFloorplanArea
 
 var rooms []Room
-var channels = []chan bool{
-	make(chan bool),
-	make(chan bool),
+var channels = []chan int{
+	make(chan int),
+	make(chan int),
 }
 
 var signals = map[string]interface{}{
@@ -65,7 +65,7 @@ var signals = map[string]interface{}{
 func main() {
 	println("Started")
 	//lrl_chan := make(chan bool)
-	go homelink_controller.Setup(&channels[1])
+	go homelink_controller.Setup(&channels[0], &channels[1])
 	// load the room data
 	room_data, err := ioutil.ReadFile("rooms.json")
 	if err != nil {
@@ -206,18 +206,14 @@ func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event)
 				this_room.YMin < y &&
 				y < this_room.YMax {
 				println("Click in room ", this_room.Name)
-				//if this_room.Responder.Id != 0 {
-				// 	go this_room.Responder.TurnOn()
-				// 	//this_room.Responder.GetStatus()
-				// }
-				if this_room.ChannelId != 0 {
-					fmt.Println("this_room.ChannelId:", this_room.ChannelId)
+				fmt.Println("this_room.ChannelId:", this_room.ChannelId)
+				if this_room.ChannelId >= 0 {
 					this_channel := channels[this_room.ChannelId]
 					fmt.Println("this_room.Chan not nil. Sending down channel")
 					if long_click {
-						this_channel <- false
+						this_channel <- 1
 					} else {
-						this_channel <- true
+						this_channel <- 0
 					}
 					fmt.Println("this_room.Chan sent")
 				}
