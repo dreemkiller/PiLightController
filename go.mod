@@ -1,4 +1,4 @@
-module github.com/dreemkiller/TouchScreenHomekit
+module github.com/dreemkiller/PiLightController
 
 go 1.20
 
