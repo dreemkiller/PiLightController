@@ -13,27 +13,51 @@ import (
 	"github.com/brutella/hap/service"
 )
 
-var lrl_sw = service.NewStatelessProgrammableSwitch()
-var fl_sw = service.NewStatelessProgrammableSwitch()
+type Room struct {
+	RoomName   string
+	Floor      uint32
+	XMin       float64
+	XMax       float64
+	YMin       float64
+	YMax       float64
+	ChannelId  int32
+	SwitchName string
+}
 
-func Setup(lrl_chan *chan int, fl_chan *chan int) {
+func Setup(channels *[]chan int, rooms *[]Room, max_channel_id int32) {
 	fmt.Println("homelink_controller.Setup started")
-	// Create the switch accessory.
-	a0 := accessory.New(accessory.Info{
-		Name: "LivingRoomLightSwitch",
-	},
-		accessory.TypeProgrammableSwitch)
-	a0.AddS(lrl_sw.S)
-	a1 := accessory.New(accessory.Info{
-		Name: "FoyerLightSwitch",
-	},
-		accessory.TypeProgrammableSwitch)
-	a1.AddS(fl_sw.S)
+	accessories := make([]*accessory.A, max_channel_id+1)
+	switches := make([]service.StatelessProgrammableSwitch, max_channel_id+1)
+	for i := int32(0); i <= max_channel_id; i++ {
+		// Figure out which room has this channel ID
+		var this_room Room
+		found := false
+		for _, this_room = range *rooms {
+			if this_room.ChannelId == i {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Panic("We should not be here")
+		}
+		// Create the switch accessory.
+		accessories[i] = accessory.New(
+			accessory.Info{
+				Name: this_room.SwitchName,
+			},
+			accessory.TypeProgrammableSwitch,
+		)
+		// Create the switch
+		switches[i] = *service.NewStatelessProgrammableSwitch()
+		// Add the switch to the accessory
+		accessories[i].AddS(switches[i].S)
+	}
 	// Store the data in the "./db" directory.
 	fs := hap.NewFsStore("./db")
 
 	// Create the hap server.
-	server, err := hap.NewServer(fs, a0, a1)
+	server, err := hap.NewServer(fs, accessories[0], accessories[1:]...)
 	if err != nil {
 		// stop if an error happens
 		log.Panic(err)
@@ -54,8 +78,9 @@ func Setup(lrl_chan *chan int, fl_chan *chan int) {
 		cancel()
 	}()
 
-	go listen_to_chan(lrl_chan, lrl_sw)
-	go listen_to_chan(fl_chan, fl_sw)
+	for i := int32(0); i <= max_channel_id; i++ {
+		go listen_to_chan(&(*channels)[i], &switches[i])
+	}
 	// Run the server.
 	fmt.Println("homelink_controller.Setup Listening")
 	server.ListenAndServe(ctx)

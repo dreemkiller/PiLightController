@@ -30,30 +30,14 @@ type DrawableFloorplanArea struct {
 	image *gtk.Image
 }
 
-type RoomChannels struct {
-}
-
-type Room struct {
-	Name      string
-	Floor     uint32
-	XMin      float64
-	XMax      float64
-	YMin      float64
-	YMax      float64
-	ChannelId int32
-}
-
 var floors_pixbuf [2]FloorPixbuf
 
 var current_floor_num FloorNumber
 
 var drawable_floorplan DrawableFloorplanArea
 
-var rooms []Room
-var channels = []chan int{
-	make(chan int),
-	make(chan int),
-}
+var rooms []homelink_controller.Room
+var channels_ptr *[]chan int
 
 var signals = map[string]interface{}{
 	"on_floor_button_clicked":           on_floor_button_clicked,
@@ -64,8 +48,6 @@ var signals = map[string]interface{}{
 
 func main() {
 	println("Started")
-	//lrl_chan := make(chan bool)
-	go homelink_controller.Setup(&channels[0], &channels[1])
 	// load the room data
 	room_data, err := ioutil.ReadFile("rooms.json")
 	if err != nil {
@@ -78,7 +60,20 @@ func main() {
 		log.Fatalln("json.Unmarshal failed:", err)
 	}
 
-	println("Rooms:", rooms)
+	// Get the number of channels needed
+	var max_channel_id int32 = 0
+	for _, this_room := range rooms {
+		if this_room.ChannelId > max_channel_id {
+			max_channel_id = this_room.ChannelId
+		}
+	}
+	channels := make([]chan int, max_channel_id+1)
+	for i := int32(0); i <= max_channel_id; i++ {
+		channels[i] = make(chan int)
+	}
+	channels_ptr = &channels
+
+	go homelink_controller.Setup(&channels, &rooms, max_channel_id)
 
 	const appId = "com.dreemkiller.light_controller"
 	app, err := gtk.ApplicationNew(appId, glib.APPLICATION_FLAGS_NONE)
@@ -205,10 +200,10 @@ func floorplan_button_release_event_cb(eventbox *gtk.EventBox, event *gdk.Event)
 				x < this_room.XMax &&
 				this_room.YMin < y &&
 				y < this_room.YMax {
-				println("Click in room ", this_room.Name)
+				println("Click in room ", this_room.RoomName)
 				fmt.Println("this_room.ChannelId:", this_room.ChannelId)
 				if this_room.ChannelId >= 0 {
-					this_channel := channels[this_room.ChannelId]
+					this_channel := (*channels_ptr)[this_room.ChannelId]
 					fmt.Println("this_room.Chan not nil. Sending down channel")
 					if long_click {
 						this_channel <- 1
